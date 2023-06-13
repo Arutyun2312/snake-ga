@@ -6,8 +6,6 @@ import collections
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-import copy
 DEVICE = 'cpu' # 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class DQNAgent(torch.nn.Module):

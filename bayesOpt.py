@@ -6,7 +6,6 @@ Created on Sun Mar 15 21:10:29 2020
 """
 from snakeClass import run
 from GPyOpt.methods import BayesianOptimization
-import datetime
 
 ################################################
 #   Set parameters for Bayesian Optimization   #

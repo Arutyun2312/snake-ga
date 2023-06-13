@@ -1,4 +1,3 @@
-import os
 import pygame
 import argparse
 import numpy as np
@@ -10,7 +9,6 @@ import random
 import statistics
 import torch.optim as optim
 import torch 
-from GPyOpt.methods import BayesianOptimization
 from bayesOpt import *
 import datetime
 import distutils.util

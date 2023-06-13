@@ -1,35 +1,23 @@
-absl-py==0.8.0
-certifi==2020.12.5
-cmake-example==0.0.1
-cycler==0.10.0
-dataclasses==0.8
-decorator==4.4.2
-google-pasta==0.1.7
-GPy==1.9.9
-GPyOpt==1.2.6
-kiwisolver==1.2.0
-matplotlib==3.2.0
-mkl-fft==1.2.0
-mkl-random==1.1.1
-mkl-service==2.3.0
-msgpack-numpy==0.4.4.3
-numpy==1.18.1
-olefile==0.46
-pandas==0.25.1
+absl-py==1.4.0
+Cython==0.29.35
+decorator==5.1.1
+GPy==1.10.0
+msgpack==1.0.5
+msgpack-numpy==0.4.8
+numpy==1.24.3
+pandas==2.0.2
 paramz==0.9.5
-Pillow @ file:///C:/ci/pillow_1603822370986/work
-pygame==1.9.6
-pyparsing==2.4.7
-python-dateutil==2.8.1
-pytz==2020.1
-scipy @ file:///C:/ci/scipy_1597675683670/work
-seaborn==0.10.1
-six @ file:///C:/ci/six_1605187303045/work
-tabulate==0.8.3
-tensorflow-estimator==1.14.0
-tensorpack==0.9.4
-tgan==0.1.0
-torch==1.7.1
-typing-extensions @ file:///tmp/build/80754af9/typing_extensions_1598376058250/work
-wincertstore==0.2
-wrapt==1.11.2
+psutil==5.9.5
+pygame==2.4.0
+python-dateutil==2.8.2
+pytz==2023.3
+pyzmq==25.1.0
+scipy==1.10.1
+six==1.16.0
+tabulate==0.9.0
+tensorflow-estimator==2.12.0
+tensorpack==0.11
+termcolor==2.3.0
+tgan==0.0.0
+tqdm==4.65.0
+tzdata==2023.3
