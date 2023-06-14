@@ -3,7 +3,7 @@ from random import randint
 import pygame
 
 
-class Food(object):
+class Food:
     def __init__(self):
         self.x = 240
         self.y = 200

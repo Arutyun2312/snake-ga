@@ -56,7 +56,10 @@ def display_ui(game: Game, score: int, highScore: int):
 def display(player: Player, food: Food, game: Game, highScore: int):
     game.gameDisplay.fill((255, 255, 255))
     display_ui(game, game.score, highScore)
-    player.display_player(player.food, game)
+    if game.crash:
+        pygame.time.wait(300)
+    else:
+        player.display_player(player.food, game)
     game.gameDisplay.blit(food.image, food.position)
     pygame.display.update()
 
