@@ -8,6 +8,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from food import Food
+from game import Game
+from player import Player
 
 # from snakeClass import Food, Game, Player
 DEVICE = 'cpu' # 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -44,14 +46,14 @@ class DQNAgent(torch.nn.Module):
             self.model = self.load_state_dict(torch.load(self.weights))
             print("weights loaded")
 
-    def forward(self, x):
-        x = F.relu(self.f1(x))
-        x = F.relu(self.f2(x))
-        x = F.relu(self.f3(x))
-        x = F.softmax(self.f4(x), dim=-1)
-        return x
+    def forward(self, tensor: torch.Tensor):
+        tensor = F.relu(self.f1(tensor))
+        tensor = F.relu(self.f2(tensor))
+        tensor = F.relu(self.f3(tensor))
+        tensor = F.softmax(self.f4(tensor), dim=-1)
+        return tensor
     
-    def get_state(self, game, player, food: Food):
+    def get_state(self, game: Game, player: Player, food: Food):
         """
         Return the state.
         The state is a numpy array of 11 values, representing:
@@ -101,7 +103,7 @@ class DQNAgent(torch.nn.Module):
 
         return np.asarray([(1 if state else 0) for state in state])
 
-    def set_reward(self, player, crash):
+    def set_reward(self, player: Player, crash: bool):
         """
         Return the reward.
         The reward is:

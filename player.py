@@ -1,7 +1,6 @@
 
 import pygame
 import numpy as np
-from bayesOpt import *
 from food import Food
 from game import Game
 
