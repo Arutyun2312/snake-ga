@@ -10,8 +10,7 @@ class Player(object):
         y = 0.5 * size[1]
         self.x = x - x % 20
         self.y = y - y % 20
-        self.tail = []
-        self.tail.append(self.position)
+        self.tail = [self.position]
         self.food = 1
         self.eaten = False
         self.image = pygame.image.load('img/snakeBody.png')
