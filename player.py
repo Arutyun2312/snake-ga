@@ -5,21 +5,24 @@ from food import Food
 from game import Game
 
 class Player(object):
-    def __init__(self, size: list[list]):
+    def __init__(self, size: list[int]):
         x = 0.45 * size[0]
         y = 0.5 * size[1]
         self.x = x - x % 20
         self.y = y - y % 20
         self.tail = [self.position]
-        self.food = 1
         self.eaten = False
         self.image = pygame.image.load('img/snakeBody.png')
         self.x_change = 20
         self.y_change = 0
-
+    
     @property
     def position(self):
         return [self.x, self.y]
+    
+    @property
+    def food(self):
+        return len(self.tail)
 
     def update_position(self):
         if self.tail[-1] == self.position: 
@@ -32,9 +35,8 @@ class Player(object):
         move_array = [self.x_change, self.y_change]
 
         if self.eaten:
-            self.tail.append([self.x, self.y])
+            self.tail.append(self.position)
             self.eaten = False
-            self.food += 1
         if np.array_equal(move, [1, 0, 0]):
             move_array = self.x_change, self.y_change
         elif np.array_equal(move, [0, 1, 0]) and self.y_change == 0:  # right - going horizontal
@@ -48,25 +50,20 @@ class Player(object):
         self.x_change, self.y_change = move_array
         self.x, self.y = x + self.x_change, y + self.y_change
 
-        if self.x < 20 or self.x > game.game_width - 40 \
-                or self.y < 20 \
-                or self.y > game.game_height - 40 \
-                or [self.x, self.y] in self.tail:
-            game.crash = True
+        game.crash = self.isGameOver(game)
         self.eat(food, game)
-
         self.update_position()
+    
+    def isGameOver(self, game: Game):
+        def isOut(i: int): return self.position[i] < 20 or self.position[i] > game.size[i] - 40
+        return any((isOut(i) for i in range(2))) or self.position in self.tail[:-1]
 
     def eat(self, food: Food, game: Game):
-        if self.position == food.position:
-            food.randomize(game.size, self.tail)
-            self.eaten = True
-            game.score += 1
+        if self.position != food.position: return
+        food.randomize(game.size, self.tail)
+        self.eaten = True
+        game.score += 1
 
-    def display_player(self, food: Food, game: Game):
-        if game.crash == False:
-            for i in range(food):
-                x_temp, y_temp = self.tail[len(self.tail) - 1 - i]
-                game.gameDisplay.blit(self.image, (x_temp, y_temp))
-        else:
-            pygame.time.wait(300)
+    def display_player(self, game: Game):
+        for i in range(self.food):
+            game.gameDisplay.blit(self.image, self.tail[-(i + 1)])

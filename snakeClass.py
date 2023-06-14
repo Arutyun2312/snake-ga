@@ -59,7 +59,7 @@ def display(player: Player, food: Food, game: Game, highScore: int):
     if game.crash:
         pygame.time.wait(300)
     else:
-        player.display_player(player.food, game)
+        player.display_player(game)
     game.gameDisplay.blit(food.image, food.position)
     pygame.display.update()
 
