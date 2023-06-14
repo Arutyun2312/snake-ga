@@ -3,15 +3,17 @@ import argparse
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from DQN import DQNAgent
 from random import randint
 import random
 import statistics
 import torch.optim as optim
-import torch 
+import torch
+from DQN import DQNAgent 
 from bayesOpt import *
-import datetime
+from datetime import datetime
 import distutils.util
+from food import Food
+
 DEVICE = 'cpu' # 'cuda' if torch.cuda.is_available() else 'cpu'
 
 #################################
@@ -33,14 +35,14 @@ def define_parameters():
     params['train'] = False
     params["test"] = True
     params['plot_score'] = True
-    params['log_path'] = 'logs/scores_' + str(datetime.datetime.now().strftime("%Y%m%d%H%M%S")) +'.txt'
+    params['log_path'] = 'logs/scores_' + str(datetime.now().strftime("%Y%m%d%H%M%S")) +'.txt'
     return params
 
 
 class Game:
     """ Initialize PyGAME """
     
-    def __init__(self, game_width, game_height):
+    def __init__(self, game_width: int, game_height: int):
         pygame.display.set_caption('SnakeGen')
         self.game_width = game_width
         self.game_height = game_height
@@ -51,34 +53,42 @@ class Game:
         self.food = Food()
         self.score = 0
 
+    @property
+    def size(self): 
+        return (self.game_width, self.game_height)
+
 
 class Player(object):
-    def __init__(self, game):
+    def __init__(self, game: Game):
         x = 0.45 * game.game_width
         y = 0.5 * game.game_height
         self.x = x - x % 20
         self.y = y - y % 20
-        self.position = []
-        self.position.append([self.x, self.y])
+        self.tail = []
+        self.tail.append([self.x, self.y])
         self.food = 1
         self.eaten = False
         self.image = pygame.image.load('img/snakeBody.png')
         self.x_change = 20
         self.y_change = 0
 
+    @property
+    def position(self):
+        return [self.x, self.y]
+
     def update_position(self, x, y):
-        if self.position[-1][0] != x or self.position[-1][1] != y:
+        if self.tail[-1][0] != x or self.tail[-1][1] != y:
             if self.food > 1:
                 for i in range(0, self.food - 1):
-                    self.position[i][0], self.position[i][1] = self.position[i + 1]
-            self.position[-1][0] = x
-            self.position[-1][1] = y
+                    self.tail[i][0], self.tail[i][1] = self.tail[i + 1]
+            self.tail[-1][0] = x
+            self.tail[-1][1] = y
 
-    def do_move(self, move, x, y, game, food, agent):
+    def do_move(self, move, x: float, y: float, game: Game, food):
         move_array = [self.x_change, self.y_change]
 
         if self.eaten:
-            self.position.append([self.x, self.y])
+            self.tail.append([self.x, self.y])
             self.eaten = False
             self.food = self.food + 1
         if np.array_equal(move, [1, 0, 0]):
@@ -98,19 +108,25 @@ class Player(object):
         if self.x < 20 or self.x > game.game_width - 40 \
                 or self.y < 20 \
                 or self.y > game.game_height - 40 \
-                or [self.x, self.y] in self.position:
+                or [self.x, self.y] in self.tail:
             game.crash = True
-        eat(self, food, game)
+        self.eat(food, game)
 
         self.update_position(self.x, self.y)
 
-    def display_player(self, x, y, food, game):
-        self.position[-1][0] = x
-        self.position[-1][1] = y
+    def eat(self, food: Food, game: Game):
+        if self.position == food.position:
+            food.randomize(game.size, self.tail)
+            self.eaten = True
+            game.score += 1
+
+    def display_player(self, x: float, y: float, food, game: Game):
+        self.tail[-1][0] = x
+        self.tail[-1][1] = y
 
         if game.crash == False:
             for i in range(food):
-                x_temp, y_temp = self.position[len(self.position) - 1 - i]
+                x_temp, y_temp = self.tail[len(self.tail) - 1 - i]
                 game.gameDisplay.blit(self.image, (x_temp, y_temp))
 
             update_screen()
@@ -118,42 +134,8 @@ class Player(object):
             pygame.time.wait(300)
 
 
-class Food(object):
-    def __init__(self):
-        self.x_food = 240
-        self.y_food = 200
-        self.image = pygame.image.load('img/food2.png')
 
-    def food_coord(self, game, player):
-        x_rand = randint(20, game.game_width - 40)
-        self.x_food = x_rand - x_rand % 20
-        y_rand = randint(20, game.game_height - 40)
-        self.y_food = y_rand - y_rand % 20
-        if [self.x_food, self.y_food] not in player.position:
-            return self.x_food, self.y_food
-        else:
-            self.food_coord(game, player)
-
-    def display_food(self, x, y, game):
-        game.gameDisplay.blit(self.image, (x, y))
-        update_screen()
-
-
-def eat(player, food, game):
-    if player.x == food.x_food and player.y == food.y_food:
-        food.food_coord(game, player)
-        player.eaten = True
-        game.score = game.score + 1
-
-
-def get_record(score, record):
-    if score >= record:
-        return score
-    else:
-        return record
-
-
-def display_ui(game, score, record):
+def display_ui(game: Game, score: int, record: int):
     myfont = pygame.font.SysFont('Segoe UI', 20)
     myfont_bold = pygame.font.SysFont('Segoe UI', 20, True)
     text_score = myfont.render('SCORE: ', True, (0, 0, 0))
@@ -167,21 +149,22 @@ def display_ui(game, score, record):
     game.gameDisplay.blit(game.bg, (10, 10))
 
 
-def display(player, food, game, record):
+def display(player: Player, food: Food, game: Game, record):
     game.gameDisplay.fill((255, 255, 255))
     display_ui(game, game.score, record)
-    player.display_player(player.position[-1][0], player.position[-1][1], player.food, game)
-    food.display_food(food.x_food, food.y_food, game)
+    player.display_player(player.tail[-1][0], player.tail[-1][1], player.food, game)
+    game.gameDisplay.blit(food.image, (food.x, food.y))
+    update_screen()
 
 
 def update_screen():
     pygame.display.update()
 
 
-def initialize_game(player, game, food, agent, batch_size):
+def initialize_game(player: Player, game: Game, food: Food, agent: DQNAgent, batch_size: int):
     state_init1 = agent.get_state(game, player, food)  # [0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0]
     action = [1, 0, 0]
-    player.do_move(action, player.x, player.y, game, food, agent)
+    player.do_move(action, player.x, player.y, game, food)
     state_init2 = agent.get_state(game, player, food)
     reward1 = agent.set_reward(player, game.crash)
     agent.remember(state_init1, action, reward1, state_init2, game.crash)
@@ -231,12 +214,11 @@ def run(params):
     agent = DQNAgent(params)
     agent = agent.to(DEVICE)
     agent.optimizer = optim.Adam(agent.parameters(), weight_decay=0, lr=params['learning_rate'])
-    counter_games = 0
     score_plot = []
     counter_plot = []
     record = 0
     total_score = 0
-    while counter_games < params['episodes']:
+    for counter_games in range(params['episodes']):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -273,7 +255,7 @@ def run(params):
                     final_move = np.eye(3)[np.argmax(prediction.detach().cpu().numpy()[0])]
 
             # perform new move and get new state
-            player1.do_move(final_move, player1.x, player1.y, game, food1, agent)
+            player1.do_move(final_move, player1.x, player1.y, game, food1)
             state_new = agent.get_state(game, player1, food1)
 
             # set reward for the new state
@@ -289,7 +271,7 @@ def run(params):
                 # store the new data into a long term memory
                 agent.remember(state_old, final_move, reward, state_new, game.crash)
 
-            record = get_record(game.score, record)
+            record = max(game.score, record)
             if params['display']:
                 display(player1, food1, game, record)
                 pygame.time.wait(params['speed'])
