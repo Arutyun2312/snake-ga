@@ -25,11 +25,9 @@ class Player(object):
         return len(self.tail)
 
     def update_position(self):
-        if self.tail[-1] == self.position: 
+        if self.tail[-1] == self.position:
             return
-        for i in range(max(0, self.food - 1)):
-            self.tail[i] = self.tail[i + 1]
-        self.tail[-1] = self.position
+        self.tail = self.tail[1:] + [self.position]
 
     def do_move(self, move, x: float, y: float, game: Game, food: Food):
         move_array = [self.x_change, self.y_change]
