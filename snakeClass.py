@@ -66,7 +66,7 @@ def display(player: Player, food: Food, game: Game, highScore: int):
 def initialize_game(player: Player, game: Game, food: Food, agent: DQNAgent, batch_size: int):
     state_init1 = agent.get_state(game, player, food)  # [0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0]
     action = [1, 0, 0]
-    player.do_move(action, player.x, player.y, game, food)
+    player.do_move(action, game, food)
     state_init2 = agent.get_state(game, player, food)
     reward1 = agent.set_reward(player, game.crash)
     agent.remember(state_init1, action, reward1, state_init2, game.crash)
@@ -157,7 +157,7 @@ def run(params):
                     final_move = np.eye(3)[np.argmax(prediction.detach().cpu().numpy()[0])]
 
             # perform new move and get new state
-            player.do_move(final_move, player.x, player.y, game, food)
+            player.do_move(final_move, game, food)
             state_new = agent.get_state(game, player, food)
 
             # set reward for the new state

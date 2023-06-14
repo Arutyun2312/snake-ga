@@ -29,7 +29,7 @@ class Player(object):
             return
         self.tail = self.tail[1:] + [self.position]
 
-    def do_move(self, move, x: float, y: float, game: Game, food: Food):
+    def do_move(self, move, game: Game, food: Food):
         move_array = [self.x_change, self.y_change]
 
         if self.eaten:
@@ -46,7 +46,7 @@ class Player(object):
         elif np.array_equal(move, [0, 0, 1]) and self.x_change == 0:  # left - going vertical
             move_array = [self.y_change, 0]
         self.x_change, self.y_change = move_array
-        self.x, self.y = x + self.x_change, y + self.y_change
+        self.x, self.y = self.x + self.x_change, self.y + self.y_change
 
         game.crash = self.isGameOver(game)
         self.eat(food, game)
